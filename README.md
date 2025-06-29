@@ -1,1 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Blog Pribadi Muhammad Anam Apriansyah</title>
+    <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen font-sans">
 
+  <header class="flex items-center justify-between px-5 py-4 shadow-md bg-black">
+    <!-- Nama / Logo -->
+    <h1 class="text-cyan-400 text-xl font-bold">M Anam Apriansyah</h1>
+
+    <div class="relative">
+      <button id="menu-button" onclick="toggleMenu()" class="flex flex-col gap-1 focus:outline-none">
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+        <span class="block w-6 h-0.5 bg-white"></span>
+      </button>
+
+      <!-- 🔽 Dropdown Menu -->
+      <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-40 bg-gray-800 text-white rounded-lg shadow-lg transform origin-top scale-95 transition-all duration-200 ease-out z-50">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-700 rounded-t">Tentang Saya</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Blog Saya</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-700">Gallery</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-700 rounded-b">Kontak</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ✨ JavaScript for toggle -->
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("dropdown-menu");
+      menu.classList.toggle("hidden");
+    }
+
+    // Close menu when clicked outside
+    window.addEventListener("click", function (e) {
+      const button = document.getElementById("menu-button");
+      const menu = document.getElementById("dropdown-menu");
+      if (!button.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel Anam Apriansyah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-hover-effect {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 255, 255, 0.1), 0 10px 10px -5px rgba(0, 255, 255, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+
+    <!-- Container -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header Section -->
+        <header class="text-center py-16">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-cyan-400 tracking-tight">
+                Halo, Saya M Anam Apriansyah
+            </h1>
+            <p class="mt-4 text-lg sm:text-xl text-gray-300">
+                Selamat datang di sudut kecil internet saya. Di sini saya berbagi cerita tentang perjalanan hidup, hobi, dan pemikiran saya tentang dunia.
+            </p>
+        </header>
+
+        <!-- Blog Categories Section -->
+        <main>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Technology Card -->
+                <div class="bg-gray-900 rounded-lg overflow-hidden card-hover-effect">
+                    <img src="https://placehold.co/600x400/0D1117/30A2FF?text=Technology" alt="Technology illustration" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-cyan-400">Judul Artikel Pertama Saya yang Menarik</h2>
+                        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Halo semua! Selamat datang di Sustained Living by Anam.
+Nama saya Muhammad Anam Apriansyah, dan saya seorang pelajar yang sedang dalam perjalanan untuk memahami dan menerapkan gaya hidup berkelanjutan. Di blog ini, saya ingin berbagi pengalaman, tantangan, dan pelajaran yang saya dapatkan selama menjadi seorang pelajar</p>
+
+                                        <a href="#" class="font-semibold text-cyan-700 hover:text-cyan-800 transition duration-300">Baca Selengkapnya &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Education Card -->
+                <div class="bg-gray-900 rounded-lg overflow-hidden card-hover-effect">
+                    <img src="https://placehold.co/600x400/0D1117/30A2FF?text=Education" alt="Education illustration" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                      <span class="text-sm text-gray-500">17 Februari 2025 • Kategori</span>
+                        <h2 class="text-2xl font-bold text-cyan-400">Siswa SMK Ma’arif Berhasil Menjadi Juara Lomba Kompetensi Siswa Tingkat Kabupaten Brebes</h2>
+                        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Saya berhasil meraih juara pada Lomba Kompetensi Siswa ke-XXXIII Tingkat Kabupaten Brebes. Untuk kategori lomba Information Network Cabling berhasil meraih juara satu atas kerja keras</p>
+                        <a href="#" class="font-semibold text-cyan-700 hover:text-cyan-800 transition duration-300">Baca Selengkapnya &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Hobbies Card -->
+                <div class="bg-gray-900 rounded-lg overflow-hidden card-hover-effect">
+                    <img src="https://placehold.co/600x400/0D1117/30A2FF?text=Hobbies" alt="Hobbies illustration" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                       <span class="text-sm text-gray-500">28-30 April 2025 • Kategori</span>
+                        <h2 class="text-2xl font-bold text-cyan-400">Peserta Lomba Kompetensi Siswa Tingkat Provinsi Jawa Tengah Tahun 2025 Information Network Cabling (INC)</h2>
+                       
+                        <p class="text-gray-600 mb-4 text-sm leading-relaxed">Halo teman-teman! Saya Muhammad Anam Apriansyah, seorang pelajar dari SMK Maarif NU Paguyangan. Setiap pelajar pasti punya impian, salah satunya mungkin bisa membawa nama baik sekolah di ajang kompetisi. Beberapa waktu lalu, saya berkesempatan untuk mewujudkan impian itu: mewakili sekolah kami di lomba kompetensi siswa tingkat Jawa Tengah. Ini adalah pengalaman yang sangat berharga, penuh pembelajaran, meskipun hasilnya tidak sesuai dengan yang saya harapkan.
+Perjalanan Menuju lomba: Antara Harapan dan Persiapan
+Rasanya campur aduk saat mengetahui saya terpilih. Ada kebanggaan, tentu saja, tapi juga beban tanggung jawab yang besar. Mewakili sekolah di tingkat provinsi bukanlah hal main-main. Saya tahu ini berarti harus berlatih lebih keras, belajar lebih banyak, dan mempersiapkan diri sebaik mungkin.
+Selama beberapa waktu sebelum lomba, hari-hari saya dipenuhi dengan latihan intensif bersama guru pembimbing,mempelajari materi tambahan. Ada banyak dukungan yang saya terima, mulai dari guru, teman-teman, hingga orang tua. Dukungan ini menjadi bahan bakar semangat saya, mendorong saya untuk memberikan yang terbaik. Saya membawa harapan tidak hanya untuk diri sendiri, tetapi juga untuk seluruh keluarga besar sekolah.
+Momen Lomba: Bertemu Peserta Hebat dan Tantangan Tak Terduga
+Akhirnya, hari yang dinanti tiba. Berada di tengah peserta dari berbagai daerah di Jawa Tengah adalah pengalaman yang luar biasa. Saya bertemu dengan banyak pelajar hebat, yang masing-masing menunjukkan kemampuan dan potensi luar biasa. Suasana kompetisi sangat terasa, memacu adrenalin saya.
+Saat lomba berlangsung, saya berusaha menampilkan yang terbaik. Semua yang sudah saya persiapkan, saya coba terapkan semaksimal mungkin. Namun, kompetisi memang selalu penuh kejutan. Ada soal yang jauh lebih sulit dari perkiraan/kondisi panggung yang berbeda/pesaing yang sangat tangguh. Saya menyadari bahwa level kompetisi di tingkat provinsi memang jauh lebih tinggi dan menantang.
+Bukan Juara, Tapi Pemenang Pengalaman
+Pengumuman pemenang adalah momen yang menegangkan. Ketika nama saya tidak disebut di antara para juara, jujur, ada rasa kecewa. Siapa yang tidak ingin membawa pulang piala dan medali? Namun, kekecewaan itu tidak bertahan lama, karena saya menyadari satu hal penting: saya adalah pemenang pengalaman.
+Meski tidak berhasil meraih juara, saya mendapatkan jauh lebih banyak. Saya belajar tentang bagaimana mengelola tekanan/pentingnya persiapan matang/sportivitas dalam berkompetisi/berani menghadapi kegagalan. Saya juga mendapatkan kesempatan untuk bertemu teman-teman baru dari daerah lain/melihat langsung standar kompetisi tingkat provinsi/mengukur kemampuan diri.
+Melangkah Maju dengan Semangat Baru
+Pengalaman di lomba tingkat Jawa Tengah ini bukan akhir dari segalanya, justru menjadi awal untuk terus berkembang. Saya jadi tahu area mana yang perlu saya tingkatkan, dan bagaimana cara belajar yang lebih efektif. Yang terpenting, saya belajar bahwa kegagalan bukanlah akhir dari segalanya, melainkan bagian dari proses belajar menuju kesuksesan yang lebih besar.
+Saya sangat bersyukur atas kesempatan ini. Terima kasih kepada sekolah, para guru, teman-teman, dan keluarga yang telah memberikan dukungan tiada henti. Pengalaman ini telah membentuk saya menjadi pribadi yang lebih tangguh dan bersemangat. Saya percaya, dengan kerja keras dan pantang menyerah, akan ada kesempatan lain di masa depan untuk terus berprestasi dan membanggakan nama sekolah.</p>
+<a href="#" class="font-semibold text-cyan-700 hover:text-cyan-800 transition duration-300">Baca Selengkapnya &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Life Card -->
+                <div class="bg-gray-900 rounded-lg overflow-hidden card-hover-effect">
+                    <img src="https://placehold.co/600x400/0D1117/30A2FF?text=Life" alt="Life illustration" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-cyan-400">Sedikit Cerita Tentang</br> Saya</h2>
+                        
+<p class="text-gray-600 mb-4 leading-relaxed">Saat ini, saya adalah seorang pelajar yang sedang menempuh pendidikan di bangku SMK. Menjadi seorang pelajar tentu bukan hanya tentang buku dan pelajaran di sekolah. Bagi saya, ini adalah sebuah perjalanan yang penuh warna, di mana saya bisa mengeksplorasi minat, mengembangkan diri, dan meraih pencapaian.
+Hobiku: 
+Olahraga: Saya sangat suka di bidang kesehatan fisik. Saya selalu merasa bersemangat setelah berolahraga, dan itu membantu saya tetap fokus saat belajar
+                        </p>
+                        <p class="text-gray-600 mb-6 leading-relaxed">
+                             
+Dari semua pengalaman ini, saya belajar bahwa:</br>
+* Keseimbangan itu Penting: Penting untuk menyeimbangkan waktu antara belajar, menekuni hobi, dan istirahat agar tidak mudah jenuh.</br>
+ * Proses Lebih Penting dari Hasil: Meskipun prestasi itu penting, proses dan usaha yang kita lakukan jauh lebih berharga.</br>
+ * Terus Belajar dan Berani Mencoba: Jangan takut untuk mencoba hal baru dan terus belajar dari setiap pengalaman.</br>
+Saya berharap cerita singkat saya ini bisa menginspirasi teman-teman semua untuk terus mengejar impian, mengembangkan diri, dan menikmati setiap momen di bangku sekolah!
+Terima kasih sudah membaca!
+                        </p>
+<div> 
+<a href="#" class="bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-800 transition duration-300 shadow-md">Hubungi Saya</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== Bagian Footer ===== -->
+    <footer id="kontak" class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-2xl font-serif mb-4">Mari Terhubung</h3>
+            <p class="text-gray-400 mb-6">Temukan saya di media sosial:</p>
+            <div class="flex justify-center space-x-6 mb-8">
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"></path></svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path></svg>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.345 4.22c.636-.247 1.363-.416 2.427-.465C9.792 3.713 10.146 3.7 12.573 3.7h.002zM12 15a3 3 0 100-6 3 3 0 000 6zm0-8a5 5 0 100 10 5 5 0 000-10zm6.5-2.5a1.25 1.25 0 100 2.5 1.25 1.25 0 000-2.5z" clip-rule="evenodd"></path></svg>
+                </a>
+            </div>
+            <p class="text-gray-500 text-sm">&copy; 2025 Anam. Dibuat dengan sepenuh hati.</p>
+        </div>
+                    
+                
+            
+        
+
+        
+        
+
+    
+
+</body>
+</html>
