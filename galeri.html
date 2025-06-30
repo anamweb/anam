@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Dinamis - Blog Pribadi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb;
+        }
+        body.overflow-hidden {
+            overflow: hidden;
+        }
+        #video-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            z-index: -2;
+            filter: blur(2px);
+        }
+        .video-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.95));
+            z-index: -1;
+        }
+        #mobile-menu {
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .menu-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        #mobile-menu.is-open .menu-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #mobile-menu.is-open .menu-item:nth-child(1) { transition-delay: 0.1s; }
+        #mobile-menu.is-open .menu-item:nth-child(2) { transition-delay: 0.2s; }
+        #mobile-menu.is-open .menu-item:nth-child(3) { transition-delay: 0.3s; }
+        #mobile-menu.is-open .menu-item:nth-child(4) { transition-delay: 0.4s; }
+        .image-container {
+            position: relative; overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .image-overlay-text {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 1rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            transform: translateY(100%); transition: transform 0.4s ease-in-out;
+        }
+        .image-container:hover .image-overlay-text { transform: translateY(0); }
+        .image-container img { transition: transform 0.4s ease-in-out; }
+        .image-container:hover img { transform: scale(1.1); }
+        #lightbox {
+            position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(10, 10, 20, 0.95); backdrop-filter: blur(8px);
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        #lightbox.is-open {
+            opacity: 1;
+        }
+        #lightbox img {
+            max-width: 90vw; max-height: 85vh; border-radius: 8px;
+            animation: zoomIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        #close-lightbox-btn {
+            position: absolute; top: 20px; right: 30px; color: white;
+            font-size: 3rem; font-weight: bold; cursor: pointer; line-height: 1;
+            transition: transform 0.2s, color 0.2s;
+        }
+        #close-lightbox-btn:hover {
+            transform: scale(1.2);
+            color: #f472b6;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <div class="video-overlay"></div>
+    <video playsinline autoplay muted loop id="video-bg">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-fast-moving-stream-of-data-34444-large.mp4" type="video/mp4">
+    </video>
+
+    <div class="relative z-10 min-h-screen">
+        <header class="bg-black/30 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Galeri Digital</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="font-semibold hover:text-cyan-300 transition-colors">Beranda</a>
+                    <a href="#" class="font-semibold text-white hover:text-cyan-300 transition-colors">Blog Saya</a>
+                    <a href="#" class="font-semibold text-white hover:text-cyan-300 transition-colors">Pencapaian</a>
+                    <a href="#" class="font-semibold hover:text-cyan-300 transition-colors">Galeri</a>
+                    <a href="#" class="font-semibold hover:text-cyan-300 transition-colors">Kontak</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="z-50 relative w-8 h-8 text-white focus:outline-none">
+                        <span class="sr-only">Buka menu</span>
+                        <div class="block w-8 h-0.5 bg-white transition-all duration-300" id="bar1"></div>
+                        <div class="block w-8 h-0.5 bg-white mt-2 transition-all duration-300" id="bar2"></div>
+                        <div class="block w-8 h-0.5 bg-white mt-2 transition-all duration-300" id="bar3"></div>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <main class="container mx-auto px-6 py-16">
+            <div class="text-center mb-16" data-aos="fade-down">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight">Momen dalam Piksel</h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-300">Sebuah koleksi visual dari berbagai perjalanan dan penemuan.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="image-container rounded-lg cursor-pointer" data-aos="fade-up">
+                    <img src="https://placehold.co/500x700/000000/a78bfa?text=Neon+City" alt="Kota Neon" class="w-full h-full object-cover">
+                    <div class="image-overlay-text"><h3 class="font-bold text-xl">Kota Neon</h3></div>
+                </div>
+                <div class="image-container rounded-lg cursor-pointer" data-aos="fade-up" data-aos-delay="100">
+                    <img src="https://placehold.co/500x700/000000/f472b6?text=Sunset+View" alt="Pemandangan Senja" class="w-full h-full object-cover">
+                    <div class="image-overlay-text"><h3 class="font-bold text-xl">Pemandangan Senja</h3></div>
+                </div>
+                <div class="image-container rounded-lg cursor-pointer" data-aos="fade-up" data-aos-delay="200">
+                    <img src="https://placehold.co/500x700/000000/22d3ee?text=Forest+Path" alt="Jalan Hutan" class="w-full h-full object-cover">
+                    <div class="image-overlay-text"><h3 class="font-bold text-xl">Jalan Setapak Hutan</h3></div>
+                </div>
+                <div class="image-container rounded-lg cursor-pointer" data-aos="fade-up" data-aos-delay="300">
+                    <img src="https://placehold.co/500x700/000000/818cf8?text=Architecture" alt="Arsitektur" class="w-full h-full object-cover">
+                    <div class="image-overlay-text"><h3 class="font-bold text-xl">Arsitektur Modern</h3></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="mobile-menu" class="hidden opacity-0 fixed inset-0 bg-black/70 backdrop-blur-xl z-40">
+        <nav class="flex flex-col items-center justify-center h-full text-center">
+            <a href="#" class="menu-item block text-3xl font-bold text-gray-200 py-4 hover:text-cyan-300 transition-colors">Beranda</a>
+            <a href="#" class="menu-item block text-3xl font-bold text-gray-200 py-4 hover:text-cyan-300 transition-colors">Galeri</a>
+            <a href="#" class="menu-item block text-3xl font-bold text-gray-200 py-4 hover:text-cyan-300 transition-colors">Tentang Saya</a>
+            <a href="#" class="menu-item block text-3xl font-bold text-gray-200 py-4 hover:text-cyan-300 transition-colors">Kontak</a>
+        </nav>
+    </div>
+
+    <div id="lightbox" class="hidden opacity-0">
+        <span id="close-lightbox-btn">&times;</span>
+        <img id="lightbox-img" src="" alt="Tampilan Penuh Gambar">
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({ duration: 700, once: true, offset: 50 });
+
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const bar1 = document.getElementById('bar1');
+            const bar2 = document.getElementById('bar2');
+            const bar3 = document.getElementById('bar3');
+            const lightbox = document.getElementById('lightbox');
+
+            menuBtn.addEventListener('click', () => {
+                const isOpen = mobileMenu.classList.contains('is-open');
+
+                if (isOpen) {
+                    mobileMenu.classList.remove('is-open');
+                    mobileMenu.style.opacity = '0';
+                    setTimeout(() => {
+                        mobileMenu.classList.add('hidden');
+                        if (!lightbox.classList.contains('is-open')) {
+                            document.body.classList.remove('overflow-hidden');
+                        }
+                    }, 400);
+                } else {
+                    mobileMenu.classList.remove('hidden');
+                    setTimeout(() => {
+                        mobileMenu.classList.add('is-open');
+                        mobileMenu.style.opacity = '1';
+                    }, 10);
+                    document.body.classList.add('overflow-hidden');
+                }
+
+                bar1.classList.toggle('rotate-45');
+                bar1.classList.toggle('translate-y-2.5');
+                bar2.classList.toggle('opacity-0');
+                bar3.classList.toggle('-rotate-45');
+                bar3.classList.toggle('-translate-y-2.5');
+            });
+
+            const lightboxImg = document.getElementById('lightbox-img');
+            const imageContainers = document.querySelectorAll('.image-container');
+            const closeLightboxBtn = document.getElementById('close-lightbox-btn');
+
+            const openLightbox = (imgSrc) => {
+                lightboxImg.src = imgSrc;
+                lightbox.classList.remove('hidden');
+                setTimeout(() => lightbox.classList.add('is-open'), 10);
+                document.body.classList.add('overflow-hidden');
+            };
+
+            const closeLightbox = () => {
+                lightbox.classList.remove('is-open');
+                setTimeout(() => {
+                    lightbox.classList.add('hidden');
+                    if (!mobileMenu.classList.contains('is-open')) {
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                }, 300);
+            };
+
+            imageContainers.forEach(container => {
+                container.addEventListener('click', () => {
+                    openLightbox(container.querySelector('img').src);
+                });
+            });
+
+            closeLightboxBtn.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', e => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && lightbox.classList.contains('is-open')) {
+                    closeLightbox();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
