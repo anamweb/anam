@@ -2,7 +2,7 @@
 const CACHE_NAME = 'arkade-game-ai-cache-v1';
 const urlsToCache = [
     './',
-    './index.html',
+    './game.html',
     './manifest.json',
     'https://cdn.tailwindcss.com',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap',
