@@ -2,7 +2,7 @@
     "name": "Arkade Game AI",
     "short_name": "Arkade AI",
     "description": "Koleksi game klasik dengan kekuatan AI Gemini.",
-    "start_url": "./index.html",
+    "start_url": "./game.html",
     "display": "standalone",
     "background_color": "#030712",
     "theme_color": "#111827",
