@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Arkade Game AI - Pusat Hiburan</title>
+    
+    <!-- PWA: Tautan ke Manifest & Warna Tema -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111827">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #e5e7eb; background-color: #030712; }
+        body.overflow-hidden { overflow: hidden; }
+        #video-bg { position: fixed; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translateX(-50%) translateY(-50%); z-index: -2; filter: blur(3px); }
+        .video-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.9)); z-index: -1; }
+        #mobile-menu { transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .menu-item { opacity: 0; transform: translateY(20px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        #mobile-menu.is-open .menu-item { opacity: 1; transform: translateY(0); }
+        #mobile-menu.is-open .menu-item:nth-child(1) { transition-delay: 0.1s; }
+        .game-card { background-color: rgba(31, 41, 55, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .game-card:hover { transform: translateY(-10px); box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3), 0 0 40px rgba(167, 139, 250, 0.3); }
+        .play-button { background-color: #a78bfa; transition: background-color 0.3s ease, transform 0.3s ease; }
+        .game-card:hover .play-button { background-color: #8b5cf6; transform: scale(1.05); }
+        .gemini-button { background-color: #22d3ee; transition: background-color 0.3s ease, transform 0.3s ease; }
+        .gemini-button:hover { background-color: #06b6d4; transform: scale(1.05); }
+        .gemini-button:disabled { background-color: #4b5563; cursor: not-allowed; }
+        .game-card img.icon { filter: invert(1); opacity: 0.8; }
+        .game-view { display: none; }
+        .game-container { background-color: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); width: 95%; max-width: 600px; }
+        canvas { display: block; width: 100%; }
+        #tic-tac-toe-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width:100%; max-width: 320px; aspect-ratio: 1 / 1; }
+        .tic-tac-toe-cell { background-color: rgba(255, 255, 255, 0.1); display: flex; justify-content: center; align-items: center; font-size: 3rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        #chess-board { display: grid; grid-template-columns: repeat(8, 1fr); border: 2px solid #8b5cf6; width:100%; max-width: 480px; aspect-ratio: 1 / 1; }
+        .chess-square { display: flex; justify-content: center; align-items: center; font-size: clamp(20px, 8vw, 40px); }
+        .chess-square.light { background-color: #ffce9e; color: #d18b47; }
+        .chess-square.dark { background-color: #d18b47; color: #ffce9e; }
+        .chess-square.selected { background-color: #8b5cf6 !important; }
+        .modal { display: none; }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <div class="video-overlay"></div>
+    <video playsinline autoplay muted loop id="video-bg">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-wireframe-mesh-of-a-human-head-4436-large.mp4" type="video/mp4">
+    </video>
+
+    <div id="arcade-view" class="relative z-10 min-h-screen">
+        <header class="bg-black/30 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
+             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Arkade AI</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="font-semibold text-white hover:text-cyan-300 transition-colors">Beranda</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="z-50 relative w-8 h-8 text-white focus:outline-none">
+                        <span class="sr-only">Buka menu</span>
+                        <div class="block w-8 h-0.5 bg-white transition-all duration-300" id="bar1"></div>
+                        <div class="block w-8 h-0.5 bg-white mt-2 transition-all duration-300" id="bar2"></div>
+                        <div class="block w-8 h-0.5 bg-white mt-2 transition-all duration-300" id="bar3"></div>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <main class="container mx-auto px-6 py-12">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">Pilih Permainanmu</h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-300">Mainkan game klasik atau ciptakan ide game baru dengan kekuatan AI.</p>
+                <div class="mt-6">
+                     <button id="generate-idea-btn" class="gemini-button text-white font-bold py-3 px-6 rounded-lg">✨ Ciptakan Ide Game</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                <div class="game-card rounded-lg flex flex-col text-center p-4">
+                    <img src="https://image.pngaaa.com/533/2119533-middle.png" alt="Ikon Game Snake" class="icon h-16 w-16 mx-auto mb-2">
+                    <h2 class="text-xl font-bold text-white">Snake</h2>
+                    <button data-game="snake" class="play-button block w-full mt-4 py-2 px-4 rounded-lg text-white font-bold">Mainkan</button>
+                </div>
+                <div class="game-card rounded-lg flex flex-col text-center p-4">
+                    <img src="https://www.svgrepo.com/show/27533/ping-pong.svg" alt="Ikon Game Pong" class="icon h-16 w-16 mx-auto mb-2">
+                    <h2 class="text-xl font-bold text-white">Pong</h2>
+                    <button data-game="pong" class="play-button block w-full mt-4 py-2 px-4 rounded-lg text-white font-bold">Mainkan</button>
+                </div>
+                <div class="game-card rounded-lg flex flex-col text-center p-4">
+                    <img src="https://www.svgrepo.com/show/432012/tic-tac-toe.svg" alt="Ikon Game Tic-Tac-Toe" class="icon h-16 w-16 mx-auto mb-2">
+                    <h2 class="text-xl font-bold text-white">Tic-Tac-Toe AI</h2>
+                    <button data-game="tic-tac-toe" class="play-button block w-full mt-4 py-2 px-4 rounded-lg text-white font-bold">Lawan AI</button>
+                </div>
+                <div class="game-card rounded-lg flex flex-col text-center p-4">
+                     <img src="https://www.svgrepo.com/show/494050/chess.svg" alt="Ikon Game Catur" class="icon h-16 w-16 mx-auto mb-2">
+                    <h2 class="text-xl font-bold text-white">Catur</h2>
+                    <button data-game="chess" class="play-button block w-full mt-4 py-2 px-4 rounded-lg text-white font-bold">Mainkan</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="game-views-container" class="relative z-10">
+        <div id="snake-game-view" class="game-view fixed inset-0 flex flex-col items-center justify-center p-4">
+            <div class="game-container p-4 sm:p-8 rounded-lg text-center flex flex-col">
+                <h2 class="text-3xl font-bold mb-4">Snake</h2>
+                <canvas id="snake-canvas" class="bg-black rounded mx-auto" style="aspect-ratio: 1/1; max-height: 70vh;"></canvas>
+                <p class="mt-4 text-xl">Skor: <span id="snake-score">0</span></p>
+                <button class="back-to-arcade-btn mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">Kembali</button>
+            </div>
+        </div>
+        <div id="pong-game-view" class="game-view fixed inset-0 flex flex-col items-center justify-center p-4">
+             <div class="game-container p-4 sm:p-8 rounded-lg text-center flex flex-col">
+                 <h2 class="text-3xl font-bold mb-4">Pong</h2>
+                 <canvas id="pong-canvas" class="bg-black rounded mx-auto" style="aspect-ratio: 3/2; max-height: 70vh;"></canvas>
+                 <p class="mt-4 text-sm">Gunakan jari/mouse untuk menggerakkan papan.</p>
+                 <button class="back-to-arcade-btn mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">Kembali</button>
+            </div>
+        </div>
+        <div id="tic-tac-toe-game-view" class="game-view fixed inset-0 flex flex-col items-center justify-center p-4">
+            <div class="game-container p-4 sm:p-8 rounded-lg text-center flex flex-col">
+                <h2 class="text-3xl font-bold mb-4">Tic-Tac-Toe vs AI</h2>
+                <div id="tic-tac-toe-personality-selector" class="mb-4">
+                    <label for="ai-personality" class="block mb-2">Pilih Kepribadian Lawan:</label>
+                    <select id="ai-personality" class="w-full bg-gray-700 text-white p-2 rounded">
+                        <option value="Sarcastic">Sarkastik</option>
+                        <option value="Overly Dramatic">Terlalu Dramatis</option>
+                        <option value="Wise Master">Guru Bijak</option>
+                        <option value="Annoying Kid">Anak Menyebalkan</option>
+                    </select>
+                </div>
+                <div id="tic-tac-toe-board" class="mx-auto"></div>
+                <p id="tic-tac-toe-status" class="mt-4 text-lg h-12"></p>
+                <div class="mt-4 space-x-2">
+                    <button id="tic-tac-toe-reset" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">Reset</button>
+                    <button class="back-to-arcade-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">Kembali</button>
+                </div>
+            </div>
+        </div>
+        <div id="chess-game-view" class="game-view fixed inset-0 flex flex-col items-center justify-center p-4">
+             <div class="game-container p-4 sm:p-8 rounded-lg text-center flex flex-col">
+                <h2 class="text-3xl font-bold mb-4">Catur</h2>
+                <div id="chess-board" class="mx-auto"></div>
+                <p class="mt-2 text-sm text-gray-400">Papan visual untuk 2 pemain.</p>
+                <button class="back-to-arcade-btn mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">Kembali</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="idea-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-50 items-center justify-center p-4">
+        <div class="game-container p-6 rounded-lg text-center max-w-md w-full relative">
+            <button id="close-idea-modal" class="absolute top-2 right-4 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-bold mb-4 text-cyan-400">✨ Ide Game dari AI</h2>
+            <div id="idea-content" class="text-left">
+                <p>Meminta ide dari AI...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden opacity-0 fixed inset-0 bg-black/70 backdrop-blur-xl z-40">
+        <nav class="flex flex-col items-center justify-center h-full text-center">
+            <a href="#" class="menu-item block text-3xl font-bold text-gray-200 py-4 hover:text-cyan-300 transition-colors">Beranda</a>
+        </nav>
+    </div>
+
+    <script>
+        // PWA Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // FIX: Corrected property from service-worker to serviceWorker
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service worker terdaftar.', reg))
+                    .catch(err => console.log('Pendaftaran service worker gagal: ', err));
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const arcadeView = document.getElementById('arcade-view');
+            const gameViewsContainer = document.getElementById('game-views-container');
+            let currentCleanup = () => {};
+
+            const showView = (viewId, initFunction) => {
+                currentCleanup();
+                arcadeView.style.display = 'none';
+                gameViewsContainer.style.display = 'block';
+                document.querySelectorAll('.game-view').forEach(v => v.style.display = 'none');
+                document.getElementById(viewId).style.display = 'flex';
+                currentCleanup = initFunction();
+            };
+
+            const showArcade = () => {
+                currentCleanup();
+                arcadeView.style.display = 'block';
+                gameViewsContainer.style.display = 'none';
+            };
+
+            document.querySelectorAll('.play-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const gameName = button.dataset.game;
+                    const gameMap = {
+                        'snake': { view: 'snake-game-view', init: initSnake },
+                        'pong': { view: 'pong-game-view', init: initPong },
+                        'tic-tac-toe': { view: 'tic-tac-toe-game-view', init: initTicTacToe },
+                        'chess': { view: 'chess-game-view', init: initChess },
+                    };
+                    if (gameMap[gameName]) {
+                        showView(gameMap[gameName].view, gameMap[gameName].init);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.back-to-arcade-btn').forEach(button => button.addEventListener('click', showArcade));
+            
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const bar1 = document.getElementById('bar1');
+            const bar2 = document.getElementById('bar2');
+            const bar3 = document.getElementById('bar3');
+            menuBtn.addEventListener('click', () => {
+                const isOpen = mobileMenu.classList.toggle('is-open');
+                bar1.classList.toggle('rotate-45', isOpen); bar1.classList.toggle('translate-y-2.5', isOpen);
+                bar2.classList.toggle('opacity-0', isOpen);
+                bar3.classList.toggle('-rotate-45', isOpen); bar3.classList.toggle('-translate-y-2.5', isOpen);
+                if (isOpen) {
+                    mobileMenu.classList.remove('hidden');
+                    setTimeout(() => mobileMenu.style.opacity = '1', 10);
+                    document.body.classList.add('overflow-hidden');
+                } else {
+                    mobileMenu.style.opacity = '0';
+                    setTimeout(() => mobileMenu.classList.add('hidden'), 400);
+                    document.body.classList.remove('overflow-hidden');
+                }
+            });
+
+            const ideaModal = document.getElementById('idea-modal');
+            const generateIdeaBtn = document.getElementById('generate-idea-btn');
+            const closeIdeaModalBtn = document.getElementById('close-idea-modal');
+            const ideaContent = document.getElementById('idea-content');
+
+            if (!navigator.onLine) {
+                generateIdeaBtn.disabled = true;
+                generateIdeaBtn.innerText = "✨ Fitur AI Offline";
+            }
+
+            generateIdeaBtn.addEventListener('click', async () => {
+                ideaModal.style.display = 'flex';
+                ideaContent.innerHTML = '<p>Meminta ide dari AI...</p>';
+                try {
+                    const prompt = "Generate a simple, creative idea for a 2D web game that can be built with HTML Canvas. Provide a name, a one-sentence description, and the core gameplay mechanic.";
+                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { 
+                        contents: chatHistory,
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    "name": { "type": "STRING" },
+                                    "description": { "type": "STRING" },
+                                    "mechanic": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content.parts[0].text) {
+                        const idea = JSON.parse(result.candidates[0].content.parts[0].text);
+                        ideaContent.innerHTML = `
+                            <h3 class="text-xl font-bold mb-2">${idea.name}</h3>
+                            <p class="mb-2"><strong>Deskripsi:</strong> ${idea.description}</p>
+                            <p><strong>Mekanik Inti:</strong> ${idea.mechanic}</p>
+                        `;
+                    } else {
+                         throw new Error("Respons API tidak valid.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching game idea:", error);
+                    ideaContent.innerHTML = '<p class="text-red-400">Maaf, terjadi kesalahan saat mengambil ide. Coba lagi nanti.</p>';
+                }
+            });
+            closeIdeaModalBtn.addEventListener('click', () => ideaModal.style.display = 'none');
+
+            // --- Game Init Functions ---
+            function initSnake() {
+                const canvas = document.getElementById('snake-canvas');
+                const ctx = canvas.getContext('2d');
+                const scoreEl = document.getElementById('snake-score');
+                canvas.width = 400; canvas.height = 400;
+                
+                let box = 20;
+                let snake, food, score, d, gameLoop;
+
+                function reset() {
+                    snake = [{ x: 9 * box, y: 10 * box }];
+                    food = { x: Math.floor(Math.random() * 20) * box, y: Math.floor(Math.random() * 20) * box };
+                    score = 0;
+                    d = null;
+                    scoreEl.innerText = score;
+                }
+
+                function direction(event) {
+                    if (event.keyCode == 37 && d != "RIGHT") d = "LEFT";
+                    else if (event.keyCode == 38 && d != "DOWN") d = "UP";
+                    else if (event.keyCode == 39 && d != "LEFT") d = "RIGHT";
+                    else if (event.keyCode == 40 && d != "UP") d = "DOWN";
+                }
+                document.addEventListener("keydown", direction);
+
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    for (let i = 0; i < snake.length; i++) {
+                        ctx.fillStyle = (i == 0) ? "#a78bfa" : "white";
+                        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                    }
+                    ctx.fillStyle = "#f472b6";
+                    ctx.fillRect(food.x, food.y, box, box);
+
+                    let snakeX = snake[0].x;
+                    let snakeY = snake[0].y;
+
+                    if (d == "LEFT") snakeX -= box;
+                    if (d == "UP") snakeY -= box;
+                    if (d == "RIGHT") snakeX += box;
+                    if (d == "DOWN") snakeY += box;
+
+                    if (snakeX == food.x && snakeY == food.y) {
+                        score++;
+                        food = { x: Math.floor(Math.random() * 20) * box, y: Math.floor(Math.random() * 20) * box };
+                    } else {
+                        if(snake.length) snake.pop();
+                    }
+
+                    let newHead = { x: snakeX, y: snakeY };
+                    const collision = (head, arr) => arr.some(segment => segment.x === head.x && segment.y === head.y);
+
+                    if (snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead, snake)) {
+                        clearInterval(gameLoop);
+                        reset();
+                        gameLoop = setInterval(draw, 100);
+                    } else {
+                       snake.unshift(newHead);
+                    }
+                    scoreEl.innerText = score;
+                }
+                
+                reset();
+                gameLoop = setInterval(draw, 100);
+                return () => {
+                    clearInterval(gameLoop);
+                    document.removeEventListener("keydown", direction);
+                };
+            }
+
+            function initPong() {
+                const canvas = document.getElementById('pong-canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 600; canvas.height = 400;
+
+                const paddleWidth = 10, paddleHeight = 100;
+                let ball, player, ai, gameLoop;
+
+                function resetBall() {
+                    ball.x = canvas.width / 2;
+                    ball.y = canvas.height / 2;
+                    ball.dx = -ball.dx;
+                }
+                
+                function resetGame() {
+                    ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 8, speed: 7, dx: 5, dy: 5 };
+                    player = { x: canvas.width - paddleWidth - 5, y: (canvas.height - paddleHeight) / 2, width: paddleWidth, height: paddleHeight, score: 0 };
+                    ai = { x: 5, y: (canvas.height - paddleHeight) / 2, width: paddleWidth, height: paddleHeight, score: 0 };
+                }
+
+                function movePaddle(e) {
+                    e.preventDefault();
+                    let rect = canvas.getBoundingClientRect();
+                    let y;
+                    if (e.type === 'touchmove') {
+                        y = e.touches[0].clientY - rect.top;
+                    } else {
+                        y = e.clientY - rect.top;
+                    }
+                    player.y = y - player.height / 2;
+                }
+                canvas.addEventListener('mousemove', movePaddle);
+                canvas.addEventListener('touchmove', movePaddle, { passive: false });
+
+                function update() {
+                    ball.x += ball.dx;
+                    ball.y += ball.dy;
+                    ai.y += (ball.y - (ai.y + ai.height / 2)) * 0.1;
+                    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.dy = -ball.dy;
+                    if (ball.x + ball.radius > canvas.width) { ai.score++; resetBall(); } 
+                    else if (ball.x - ball.radius < 0) { player.score++; resetBall(); }
+
+                    const p = (ball.x < canvas.width/2) ? ai : player;
+                    if (ball.y > p.y && ball.y < p.y + p.height && ((p === player && ball.x + ball.radius > p.x) || (p === ai && ball.x - ball.radius < p.x + p.width))) {
+                        ball.dx = -ball.dx;
+                    }
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = "white";
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.fillStyle = "#a78bfa";
+                    ctx.fillRect(player.x, player.y, player.width, player.height);
+                    ctx.fillStyle = "#f472b6";
+                    ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
+                    ctx.font = "45px Inter";
+                    ctx.fillText(ai.score, canvas.width / 4, 50);
+                    ctx.fillText(player.score, 3 * canvas.width / 4, 50);
+                }
+
+                resetGame();
+                gameLoop = setInterval(update, 1000 / 60);
+                return () => {
+                    clearInterval(gameLoop);
+                    canvas.removeEventListener('mousemove', movePaddle);
+                    canvas.removeEventListener('touchmove', movePaddle);
+                };
+            }
+
+            function initTicTacToe() {
+                const boardEl = document.getElementById('tic-tac-toe-board');
+                const statusEl = document.getElementById('tic-tac-toe-status');
+                const resetBtn = document.getElementById('tic-tac-toe-reset');
+                const personalitySelector = document.getElementById('ai-personality');
+                let board, currentPlayer, isActive;
+
+                const winningConditions = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
+
+                function resetGame() {
+                    board = ["", "", "", "", "", "", "", "", ""];
+                    isActive = true;
+                    currentPlayer = "X";
+                    statusEl.innerText = `Giliranmu (X)`;
+                    boardEl.innerHTML = '';
+                    for(let i=0; i<9; i++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('tic-tac-toe-cell');
+                        cell.setAttribute('data-index', i);
+                        cell.addEventListener('click', playerMove);
+                        boardEl.appendChild(cell);
+                    }
+                }
+
+                async function getAiMove() {
+                    if (!navigator.onLine) {
+                        statusEl.innerText = "AI tidak bisa berpikir (offline).";
+                        let availableCells = board.map((c, i) => c === "" ? i : null).filter(v => v !== null);
+                        if (availableCells.length > 0) {
+                            const randomMove = availableCells[Math.floor(Math.random() * availableCells.length)];
+                            makeMove(randomMove, "...");
+                        }
+                        return;
+                    }
+
+                    statusEl.innerText = "AI sedang berpikir...";
+                    const personality = personalitySelector.value;
+                    const prompt = `You are an AI opponent in a game of Tic-Tac-Toe. Your personality is ${personality}. The current board is represented by this array, where '' is an empty cell: [${board.map(c => `'${c}'`).join(', ')}]. It is your turn (O). Choose the best possible move (an index from 0-8 that is currently an empty string ''). Also, provide a short, in-character comment based on the game state and your personality.`;
+                    
+                    try {
+                        const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                        const payload = {
+                            contents: chatHistory,
+                            generationConfig: {
+                                responseMimeType: "application/json",
+                                responseSchema: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "move": { "type": "NUMBER" },
+                                        "comment": { "type": "STRING" }
+                                    }
+                                }
+                            }
+                        };
+                        const apiKey = "";
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                        });
+                        if (!response.ok) throw new Error("API network response was not ok.");
+                        
+                        const result = await response.json();
+                        const aiResponse = JSON.parse(result.candidates[0].content.parts[0].text);
+                        
+                        if (board[aiResponse.move] === "") {
+                            makeMove(aiResponse.move, aiResponse.comment);
+                        } else {
+                            throw new Error("AI chose an invalid move.");
+                        }
+                    } catch (error) {
+                        console.error("Error getting AI move:", error);
+                        let availableCells = board.map((c, i) => c === "" ? i : null).filter(v => v !== null);
+                        if (availableCells.length > 0) {
+                            const randomMove = availableCells[Math.floor(Math.random() * availableCells.length)];
+                            makeMove(randomMove, "Hmm, aku bingung.");
+                        }
+                    }
+                }
+
+                function makeMove(index, comment) {
+                    if (!isActive) return;
+                    board[index] = currentPlayer;
+                    const cell = boardEl.querySelector(`[data-index='${index}']`);
+                    cell.innerText = currentPlayer;
+                    cell.style.color = currentPlayer === 'X' ? '#a78bfa' : '#f472b6';
+                    
+                    statusEl.innerText = comment;
+
+                    if (checkWin(currentPlayer)) {
+                        statusEl.innerText = currentPlayer === 'X' ? "Kamu menang!" : "AI Menang! " + comment;
+                        isActive = false;
+                        return;
+                    }
+                    if (!board.includes("")) {
+                        statusEl.innerText = "Permainan seri!";
+                        isActive = false;
+                        return;
+                    }
+                    
+                    currentPlayer = currentPlayer === "X" ? "O" : "X";
+                    if (currentPlayer === 'O') {
+                        setTimeout(getAiMove, 500);
+                    } else {
+                        setTimeout(() => { if(isActive) statusEl.innerText = `Giliranmu (X)`; }, 1000);
+                    }
+                }
+
+                function playerMove(e) {
+                    const idx = parseInt(e.target.getAttribute('data-index'));
+                    if (board[idx] !== "" || !isActive || currentPlayer !== 'X') return;
+                    makeMove(idx, "Langkah yang menarik...");
+                }
+
+                function checkWin(player) {
+                    return winningConditions.some(condition => {
+                        return condition.every(index => board[index] === player);
+                    });
+                }
+                
+                resetBtn.addEventListener('click', resetGame);
+                resetGame();
+                return () => { resetBtn.removeEventListener('click', resetGame); };
+            }
+
+            function initChess() {
+                const boardEl = document.getElementById('chess-board');
+                const pieces = [ '♜','♞','♝','♛','♚','♝','♞','♜','♟','♟','♟','♟','♟','♟','♟','♟','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','♙','♙','♙','♙','♙','♙','♙','♙','♖','♘','♗','♕','♔','♗','♘','♖' ];
+                let selectedSquare = null;
+
+                function renderBoard() {
+                    boardEl.innerHTML = '';
+                    for (let i = 0; i < 64; i++) {
+                        const square = document.createElement('div');
+                        const isLight = (Math.floor(i / 8) + i) % 2 === 0;
+                        square.className = `chess-square ${isLight ? 'light' : 'dark'}`;
+                        square.innerText = pieces[i];
+                        square.dataset.index = i;
+                        square.addEventListener('click', onSquareClick);
+                        boardEl.appendChild(square);
+                    }
+                }
+
+                function onSquareClick(e) {
+                    const square = e.currentTarget;
+                    const index = parseInt(square.dataset.index);
+                    if (selectedSquare) {
+                        if (square !== selectedSquare) {
+                            pieces[index] = pieces[selectedSquare.dataset.index];
+                            pieces[selectedSquare.dataset.index] = '';
+                        }
+                        selectedSquare = null;
+                        renderBoard();
+                    } else if (pieces[index] !== '') {
+                        const currentSelected = boardEl.querySelector('.selected');
+                        if(currentSelected) currentSelected.classList.remove('selected');
+                        selectedSquare = square;
+                        square.classList.add('selected');
+                    }
+                }
+                
+                renderBoard();
+                return () => { boardEl.innerHTML = ''; };
+            }
+        });
+    </script>
+</body>
+</html>
+
